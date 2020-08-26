@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 	"syscall"
+        "encoding/json"
+
 
 	jsonschema "github.com/xeipuuv/gojsonschema"
 	lua "github.com/yuin/gopher-lua"
@@ -85,7 +87,9 @@ func BuildErrorTable(L *lua.LState, result *jsonschema.Result) *lua.LTable {
 	table := L.NewTable()
 
 	for _, err := range result.Errors() {
-		table.Append(lua.LString(err.String()))
+          j, _ := json.MarshalIndent(err.Value(), "\t.  ", "  ")
+          message := fmt.Sprintf("%s but got:\n\t=> %s\n\n", err.String(), j)
+          table.Append(lua.LString(message))
 	}
 
 	return table
